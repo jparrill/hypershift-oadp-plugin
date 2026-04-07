@@ -452,9 +452,9 @@ oc get hostedcluster <name> -n <hosted-cluster-namespace> \
   -o jsonpath='{.spec.etcd.managed.storage.restoreSnapshotURL}'
 ```
 
-The output should be an array containing the snapshot URL, e.g.:
-```
-["s3://<bucket>/<prefix>/backups/hcp-aws-backup/etcd-backup/1775589976.db"]
+The output should be an array containing a **pre-signed HTTPS URL**, e.g.:
+```json
+["https://my-bucket.s3.us-east-1.amazonaws.com/path/to/snapshot.db?X-Amz-Algorithm=AWS4-HMAC-SHA256&..."]
 ```
 
 ### Manual restoreSnapshotURL Injection
