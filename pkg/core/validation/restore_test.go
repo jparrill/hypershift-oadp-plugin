@@ -8,15 +8,14 @@ import (
 	. "github.com/onsi/gomega"
 	hyperv1 "github.com/openshift/hypershift/api/hypershift/v1beta1"
 	"github.com/sirupsen/logrus"
-	velerov1 "github.com/vmware-tanzu/velero/pkg/apis/velero/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestBackupValidatePluginConfig(t *testing.T) {
+func TestRestoreValidatePluginConfig(t *testing.T) {
 	tests := []struct {
-		name        string
-		config      map[string]string
-		wantMigr    bool
+		name       string
+		config     map[string]string
+		wantMigr   bool
 		expectError bool
 	}{
 		{
@@ -29,19 +28,30 @@ func TestBackupValidatePluginConfig(t *testing.T) {
 			wantMigr: true,
 		},
 		{
-			name:   "When config contains etcdBackupMethod, It Should accept it without error",
+			name:   "When config has migration false, It Should leave Migration as false",
+			config: map[string]string{"migration": "false"},
+		},
+		{
+			name:   "When config has etcdBackupMethod, It Should accept it without error",
 			config: map[string]string{"etcdBackupMethod": "etcdSnapshot"},
 		},
 		{
-			name:   "When config contains hoNamespace, It Should accept it without error",
+			name:   "When config has hoNamespace, It Should accept it without error",
 			config: map[string]string{"hoNamespace": "my-hypershift"},
+		},
+		{
+			name:   "When config has unknown key, It Should not return error",
+			config: map[string]string{"unknownKey": "value"},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := NewWithT(t)
-			p := &BackupPluginValidator{Log: logrus.New()}
+			p := &RestorePluginValidator{
+				Log:       logrus.New(),
+				LogHeader: "test",
+			}
 
 			opts, err := p.ValidatePluginConfig(tt.config)
 			if tt.expectError {
@@ -54,7 +64,7 @@ func TestBackupValidatePluginConfig(t *testing.T) {
 	}
 }
 
-func TestBackupValidatePlatformConfig(t *testing.T) {
+func TestRestoreValidatePlatformConfig(t *testing.T) {
 	tests := []struct {
 		name         string
 		platformType hyperv1.PlatformType
@@ -100,7 +110,10 @@ func TestBackupValidatePlatformConfig(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := NewWithT(t)
-			p := &BackupPluginValidator{Log: logrus.New()}
+			p := &RestorePluginValidator{
+				Log:       logrus.New(),
+				LogHeader: "test",
+			}
 
 			hcp := &hyperv1.HostedControlPlane{
 				ObjectMeta: metav1.ObjectMeta{Name: "test-hcp", Namespace: "test-ns"},
@@ -108,11 +121,8 @@ func TestBackupValidatePlatformConfig(t *testing.T) {
 					Platform: hyperv1.PlatformSpec{Type: tt.platformType},
 				},
 			}
-			backup := &velerov1.Backup{
-				ObjectMeta: metav1.ObjectMeta{Name: "test-backup"},
-			}
 
-			err := p.ValidatePlatformConfig(hcp, backup)
+			err := p.ValidatePlatformConfig(hcp, map[string]string{})
 			if tt.wantErr {
 				g.Expect(err).To(HaveOccurred())
 				g.Expect(err.Error()).To(ContainSubstring(tt.errSubstr))
