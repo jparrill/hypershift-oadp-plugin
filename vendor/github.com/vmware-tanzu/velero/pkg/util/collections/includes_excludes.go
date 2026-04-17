@@ -17,7 +17,6 @@ limitations under the License.
 package collections
 
 import (
-	"slices"
 	"strings"
 
 	"github.com/vmware-tanzu/velero/internal/resourcepolicies"
@@ -150,18 +149,15 @@ func (nie *NamespaceIncludesExcludes) ShouldInclude(s string) bool {
 // IncludeEverything returns true if the includes list is empty or '*'
 // and the excludes list is empty, or false otherwise.
 func (nie *NamespaceIncludesExcludes) IncludeEverything() bool {
-	return nie.includesExcludes.excludes.Len() == 0 &&
-		(nie.includesExcludes.includes.Len() == 0 ||
-			(nie.includesExcludes.includes.Len() == 1 && nie.includesExcludes.includes.Has("*")) ||
-			slices.Equal(nie.includesExcludes.includes.List(), nie.activeNamespaces))
+	return nie.includesExcludes.IncludeEverything()
 }
 
 // Attempts to expand wildcard patterns, if any, in the includes and excludes lists.
-func (nie *NamespaceIncludesExcludes) ExpandIncludesExcludes(fromBackup bool) error {
+func (nie *NamespaceIncludesExcludes) ExpandIncludesExcludes() error {
 	includes := nie.GetIncludes()
 	excludes := nie.GetExcludes()
 
-	if wildcard.ShouldExpandWildcards(includes, excludes, fromBackup) {
+	if wildcard.ShouldExpandWildcards(includes, excludes) {
 		expandedIncludes, expandedExcludes, err := wildcard.ExpandWildcards(
 			nie.activeNamespaces, includes, excludes)
 		if err != nil {
@@ -178,10 +174,10 @@ func (nie *NamespaceIncludesExcludes) ExpandIncludesExcludes(fromBackup bool) er
 
 // ResolveNamespaceList returns a list of all namespaces which will be backed up.
 // The second return value indicates whether wildcard expansion was performed.
-func (nie *NamespaceIncludesExcludes) ResolveNamespaceList(fromBackup bool) ([]string, error) {
+func (nie *NamespaceIncludesExcludes) ResolveNamespaceList() ([]string, error) {
 	// Check if this is being called by non-backup processing e.g. backup queue controller
 	if !nie.wildcardExpanded {
-		err := nie.ExpandIncludesExcludes(fromBackup)
+		err := nie.ExpandIncludesExcludes()
 		if err != nil {
 			return nil, err
 		}

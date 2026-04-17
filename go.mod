@@ -1,12 +1,14 @@
 module github.com/openshift/hypershift-oadp-plugin
 
-go 1.25.8
+go 1.25.7
+
+toolchain go1.25.8
 
 require (
 	github.com/kubernetes-csi/external-snapshotter/client/v8 v8.4.0
 	github.com/onsi/gomega v1.39.1
 	github.com/openshift/hive/apis v0.0.0-20241220022629-3f49f26197ff
-	github.com/openshift/hypershift/api v0.0.0-20260410203959-783f7956d4f9
+	github.com/openshift/hypershift/api v0.0.0-20260417092826-5431b93cee3c
 	github.com/sirupsen/logrus v1.9.4
 	github.com/vmware-tanzu/velero v1.14.0
 	k8s.io/api v0.35.3
@@ -24,7 +26,7 @@ require (
 	github.com/google/gnostic-models v0.7.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/openshift/api v0.0.0-20260120150926-4c643a652d54 // indirect
+	github.com/openshift/api v0.0.0-20260304122341-cf5d8996109f // indirect
 	github.com/openshift/custom-resource-status v1.1.3-0.20220503160415-f2fdb4999d87 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_golang v1.23.2 // indirect
@@ -74,8 +76,8 @@ require (
 	golang.org/x/term v0.41.0 // indirect
 	golang.org/x/text v0.35.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20251202230838-ff82c1b0f217 // indirect
-	google.golang.org/grpc v1.79.3 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20251103181224-f26f9409b101 // indirect
+	google.golang.org/grpc v1.77.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
@@ -88,4 +90,4 @@ require (
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
 
-replace github.com/vmware-tanzu/velero => github.com/openshift/velero v0.10.2-0.20260413161955-ea34d4d90057
+replace github.com/vmware-tanzu/velero => github.com/openshift/velero v0.10.2-0.20260323191807-216dd62a1caf
