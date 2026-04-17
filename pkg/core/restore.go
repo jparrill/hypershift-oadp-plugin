@@ -165,6 +165,34 @@ func (p *RestorePlugin) Execute(input *velero.RestoreItemActionExecuteInput) (*v
 			return nil, fmt.Errorf("error checking platform configuration: %v", err)
 		}
 
+		metadata, err := meta.Accessor(input.Item)
+		if err != nil {
+			return nil, fmt.Errorf("error getting metadata accessor: %v", err)
+		}
+		annotations := metadata.GetAnnotations()
+		snapshotURL := annotations[common.EtcdSnapshotURLAnnotation]
+		if snapshotURL != "" {
+			if strings.HasPrefix(snapshotURL, "s3://") {
+				presigned, err := p.presignS3URL(ctx, backup, snapshotURL)
+				if err != nil {
+					return nil, fmt.Errorf("error generating pre-signed URL for etcd snapshot: %w", err)
+				}
+				p.log.Infof("Converted s3:// URL to pre-signed HTTPS URL for HostedControlPlane restore")
+				snapshotURL = presigned
+			}
+
+			if hcp.Spec.Etcd.Managed != nil {
+				hcp.Spec.Etcd.Managed.Storage.RestoreSnapshotURL = []string{snapshotURL}
+				p.log.Infof("Injected restoreSnapshotURL into HostedControlPlane %s", hcp.Name)
+
+				unstructuredHCP, err := runtime.DefaultUnstructuredConverter.ToUnstructured(hcp)
+				if err != nil {
+					return nil, fmt.Errorf("error converting HostedControlPlane to unstructured: %v", err)
+				}
+				input.Item.SetUnstructuredContent(unstructuredHCP)
+			}
+		}
+
 	case kind == "Pod":
 		p.log.Debugf("Pod found, skipping restore")
 		return velero.NewRestoreItemActionExecuteOutput(input.Item).WithoutRestore(), nil
@@ -187,7 +215,7 @@ func (p *RestorePlugin) Execute(input *velero.RestoreItemActionExecuteInput) (*v
 				if strings.HasPrefix(snapshotURL, "s3://") {
 					presigned, err := p.presignS3URL(ctx, backup, snapshotURL)
 					if err != nil {
-						return nil, fmt.Errorf("error generating pre-signed URL for etcd snapshot: %v", err)
+						return nil, fmt.Errorf("error generating pre-signed URL for etcd snapshot: %w", err)
 					}
 					p.log.Infof("Converted s3:// URL to pre-signed HTTPS URL for HostedCluster restore")
 					snapshotURL = presigned

@@ -164,6 +164,14 @@ func (p *BackupPlugin) Execute(item runtime.Unstructured, backup *velerov1.Backu
 		if err := p.waitForEtcdBackupCompletion(ctx); err != nil {
 			return nil, nil, err
 		}
+		if p.etcdSnapshotURL != "" {
+			metadata, err := meta.Accessor(item)
+			if err != nil {
+				return nil, nil, fmt.Errorf("error getting metadata accessor: %v", err)
+			}
+			common.AddAnnotation(metadata, common.EtcdSnapshotURLAnnotation, p.etcdSnapshotURL)
+			p.log.Infof("Added etcd snapshot URL annotation to HostedControlPlane %s", metadata.GetName())
+		}
 
 	case kind == common.HostedClusterKind:
 		metadata, err := meta.Accessor(item)
