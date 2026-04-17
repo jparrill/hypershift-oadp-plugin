@@ -135,6 +135,25 @@ func TestExecute(t *testing.T) {
 		},
 		// HostedControlPlane cases
 		{
+			name: "When Execute processes a HostedControlPlane with cached etcdSnapshotURL, It Should add etcd snapshot URL annotation",
+			setup: func(bp *BackupPlugin) {
+				bp.etcdSnapshotURL = "s3://bucket/backups/test/etcd-backup/snapshot.db"
+			},
+			item: func() *unstructured.Unstructured {
+				item := newUnstructuredItem("HostedControlPlane", "hypershift.openshift.io/v1beta1", "test-hcp", "clusters-test")
+				item.Object["spec"] = map[string]any{
+					"platform": map[string]any{"type": "AWS"},
+				}
+				return item
+			},
+			backup: newTestBackup,
+			assert: func(g *GomegaWithT, result runtime.Unstructured, _ *BackupPlugin) {
+				metadata := result.UnstructuredContent()["metadata"].(map[string]any)
+				annotations := metadata["annotations"].(map[string]any)
+				g.Expect(annotations[common.EtcdSnapshotURLAnnotation]).To(Equal("s3://bucket/backups/test/etcd-backup/snapshot.db"))
+			},
+		},
+		{
 			name: "When Execute processes a HostedControlPlane with volumeSnapshot method, It Should not create etcd backup",
 			item: func() *unstructured.Unstructured {
 				item := newUnstructuredItem("HostedControlPlane", "hypershift.openshift.io/v1beta1", "test-hcp", "clusters-test")
