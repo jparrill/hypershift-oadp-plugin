@@ -8,7 +8,7 @@ require (
 	github.com/kubernetes-csi/external-snapshotter/client/v8 v8.4.0
 	github.com/onsi/gomega v1.39.1
 	github.com/openshift/hive/apis v0.0.0-20241220022629-3f49f26197ff
-	github.com/openshift/hypershift/api v0.0.0-20260410203959-783f7956d4f9
+	github.com/openshift/hypershift/api v0.0.0-20260417092826-5431b93cee3c
 	github.com/sirupsen/logrus v1.9.4
 	github.com/vmware-tanzu/velero v1.14.0
 	k8s.io/api v0.35.3
@@ -90,4 +90,4 @@ require (
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
 
-replace github.com/vmware-tanzu/velero => github.com/openshift/velero v0.10.2-0.20260323170432-5ef912f438f6
+replace github.com/vmware-tanzu/velero => github.com/openshift/velero v0.10.2-0.20260323191807-216dd62a1caf
