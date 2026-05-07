@@ -6,7 +6,7 @@ toolchain go1.25.8
 
 require (
 	github.com/kubernetes-csi/external-snapshotter/client/v8 v8.4.0
-	github.com/onsi/gomega v1.39.1
+	github.com/onsi/gomega v1.40.0
 	github.com/openshift/hive/apis v0.0.0-20241220022629-3f49f26197ff
 	github.com/openshift/hypershift/api v0.0.0-20260417092826-5431b93cee3c
 	github.com/sirupsen/logrus v1.9.4
